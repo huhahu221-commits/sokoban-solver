@@ -23,9 +23,6 @@ let o=-1;
 for(const c of q)for(const e of D){const u=c+e;if((u/w|0)==Y)o=u}
 if(o<0)continue;
 const m=Array(n).fill(1);for(const c of q)m[c]=0;m[o]=0;
-const L=Array(n),lq=[];
-for(let g=0;g<n;g++)if(G[g]&&!m[g]){L[g]=1;lq.push(g)}
-for(const c of lq)for(const e of D){const u=c-e;if(!m[u]&&!m[u-e]&&!L[u]){L[u]=1;lq.push(u)}}
 const z0=wk(P,o);if(z0==null)continue;
 Z+=z0;P=o;
 const S=[bs],E=[o],A=[-1],T=[0],HM={},sn=Array(n),mk=Array(n);
@@ -37,7 +34,7 @@ const bb=S[hd];
 const sg=(rc(E[hd],sn,bb),sp);
 for(const bx of bb){
 for(const e of D){const t=bx+e;
-if(t==o|sn[bx-e]!=sg|m[t]|bb.includes(t)|!L[t])continue;
+if(t==o|sn[bx-e]!=sg|m[t]|bb.includes(t)|((m[t-1]|m[t+1])&(m[t-w]|m[t+w])&!G[t]))continue;
 const nb=bb.map(x=>x==bx?t:x).sort(),ky=rc(bx,mk,nb)+','+nb;
 if(ky in HM)continue;
 HM[ky]=S.length;S.push(nb);E.push(bx);A.push(hd);T.push(t);

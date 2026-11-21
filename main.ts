@@ -1,25 +1,57 @@
-import{mkdirSync as M,readdirSync as E,readFileSync as F,writeFileSync as W}from'node:fs';
+import{readdirSync as R,readFileSync as F,mkdirSync as K,writeFileSync as W}from'node:fs';
 const I=process.env.MAKEFUN_INPUT_DIR||'/input',O=process.env.MAKEFUN_OUTPUT_DIR||'/output';
-const P=t=>{let r=t.split('\n').filter(Boolean),h=r.length,w=Math.max(...r.map(s=>s.length))+2,f=new Set,g=new Set,b=[],p=0;
-for(let y=0;y<h+2;y++)for(let x=0;x<w;x++){let c=(y&&y<=h&&x&&x<w-1)?r[y-1][x-1]||'#':'#',i=y*w+x;
-if(c=='#')continue;f.add(i);if('.*+'.includes(c))g.add(i);if('$*'.includes(c))b.push(i);if('@+'.includes(c))p=i}
-return{w,f,g,b:b.sort(),p,d:[-w,w,-1,1]}};
-const Q=L=>{let hy=(L.p/L.w)|0,o=[];
-for(let s of L.f){if((s/L.w|0)==hy)continue;let a=new Set([s]),q=[s],p=s;L.f.delete(s);
-for(let c of q)for(let i in L.d){let n=c+L.d[i];if(!L.f.has(n))continue;
-if((n/L.w|0)==hy){p=n;continue}L.f.delete(n);a.add(n);q.push(n)}
-a.add(p);o.push({a,p})}return o};
-const S=(L,a,p,st)=>{let B=[[{p:p,b:st,mv:''}]],se=new Set([p+'|'+st]);
-for(let d=0;d<B.length;d++){let q=B[d];
-for(let s of q){
-if(s.p==p&&s.b.every(x=>L.g.has(x)))return s.mv;
-for(let i in L.d){let n=s.p+L.d[i],ch='udlr'[i];if(!a.has(n))continue;
-if(s.b.includes(n)){let t=n+L.d[i];if(!a.has(t)||t==p||s.b.includes(t))continue;
-let nb=s.b.map(x=>x==n?t:x).sort(),k=n+'|'+nb;
-if(se.has(k))continue;se.add(k);(B[d+1]=B[d+1]||[]).push({p:n,b:nb,mv:s.mv+ch});
-}else{let k=n+'|'+s.b;if(se.has(k))continue;se.add(k);q.push({p:n,b:s.b,mv:s.mv+ch})}}}}
-return null};
-const Z=t=>{let L=P(t);if(!L.p)return'';let m='',x=L.p%L.w;
-for(let r of Q(L)){let bx=L.b.filter(b=>r.a.has(b));if(!bx.length)continue;
-let g=S(L,r.a,r.p,bx);if(g===null)return'';let y=r.p%L.w;m+=y>x?'r'.repeat(y-x):'l'.repeat(x-y);m+=g;x=y}return m};
-for(let id of E(I)){let m=Z(F(I+'/'+id+'/level.txt','utf8'));M(O+'/'+id,{recursive:true});W(O+'/'+id+'/solution.txt',m+'\n')}
+for(const d of R(I)){
+const s=F(I+'/'+d+'/level.txt','utf8').trimEnd().split('\n'),w=s[0].length,J=s.join(''),n=J.length,D=[-w,w,-1,1];
+const a=Array(n).fill(1),G=Array(n).fill(0),B=[];let p=0;
+for(let i=0;i<n;i++){const c=J[i];if(c!='#'){a[i]=0;if('.*+'.includes(c))G[i]=1;if('$*'.includes(c))B.push(i);if('@+'.includes(c))p=i}}
+const Y=p/w|0,BX=Array(n).fill(0);for(const x of B)BX[x]=1;
+const oc=BX.slice();
+let Z='',P=p;
+const wk=(f,t)=>{
+if(f==t)return'';
+const U=Array(n).fill(-1),Q=[f];U[f]=f;
+for(const c of Q){if(c==t)break;for(const e of D){const u=c+e;if(a[u]&1||oc[u]||U[u]>=0)continue;U[u]=c,Q.push(u)}}
+if(U[t]<0)return;
+let z='';for(let c=t;c!=f;c=U[c])z='udlr'[D.indexOf(c-U[c])]+z;
+return z};
+for(const b of B){
+if(a[b])continue;
+const q=[b],bs=[];a[b]=2;
+for(const c of q){if(BX[c])bs.push(c);
+for(const e of D){const u=c+e;if(!a[u]&&(u/w|0)!=Y){a[u]=2;q.push(u)}}}
+bs.sort();
+let o=-1;
+for(const c of q)for(const e of D){const u=c+e;if((u/w|0)==Y)o=u}
+if(o<0)continue;
+const m=Array(n).fill(1);for(const c of q)m[c]=0;m[o]=0;
+const L=Array(n).fill(0),lq=[];
+for(let g=0;g<n;g++)if(G[g]&&!m[g]){L[g]=1;lq.push(g)}
+for(const c of lq)for(const e of D){const u=c-e;if(!m[u]&&!m[u-e]&&!L[u]){L[u]=1;lq.push(u)}}
+const z0=wk(P,o);if(z0==null)continue;
+Z+=z0;P=o;
+const S=[bs],W2=[o],PA=[-1],PT=[0],HM={},sn=Array(n).fill(0),mk=Array(n).fill(0);
+let sp=0,fd=-1;
+const rc=(f,r,b)=>{const q=++sp;let l=f,U=[f];r[f]=q;for(const c of U){if(c<l)l=c;for(const e of D){const u=c+e;if(!m[u]&&!b.includes(u)&&r[u]!=q){r[u]=q;U.push(u)}}}return l};
+HM[rc(o,sn,bs)+','+bs]=0;
+for(let hd=0;fd<0&&hd<S.length;hd++){
+const bb=S[hd];
+const sg=(rc(W2[hd],sn,bb),sp);
+for(const bx of bb){
+for(const e of D){const t=bx+e;
+if(t==o|sn[bx-e]!=sg|m[t]|bb.includes(t)|!L[t])continue;
+const nb=bb.map(x=>x==bx?t:x).sort();const ky=rc(bx,mk,nb)+','+nb;
+if(ky in HM)continue;
+HM[ky]=S.length;S.push(nb);W2.push(bx);PA.push(hd);PT.push(t);
+if(nb.every(x=>G[x]))fd=S.length-1}}
+}
+if(fd<0)continue;
+const PZ=[];
+for(let s=fd;s>0;s=PA[s])PZ.unshift([W2[s],PT[s]]);
+for(const[f2,t]of PZ){
+const z1=wk(P,2*f2-t);if(z1==null)break;
+Z+=z1+'udlr'[D.indexOf(t-f2)];
+oc[P=f2]=0;oc[t]=1}
+}
+K(O+'/'+d,{recursive:true});
+W(O+'/'+d+'/solution.txt',Z+'\n');
+}
